@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+google-genai
+google-cloud-vision
+pillow
+opencv-python
+jsonschema
+bleach
+pytest
+httpx
