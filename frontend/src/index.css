@@ -1,0 +1,130 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: #f5f5f7;
+  color: #1a1a1a;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: #555;
+  margin-top: 0;
+}
+
+.upload-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin: 24px 0;
+}
+
+.upload-form button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2b6cb0;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.upload-form button:disabled {
+  background-color: #9db8d1;
+  cursor: not-allowed;
+}
+
+.status {
+  color: #2b6cb0;
+  font-weight: 500;
+}
+
+.error {
+  color: #c53030;
+  background: #fed7d7;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (min-width: 800px) {
+  .results {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.panel h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.preview-image {
+  max-width: 100%;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.result-frame {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.download-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: #2b6cb0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.download-link:hover {
+  text-decoration: underline;
+}
+
+.raw-html {
+  margin-top: 12px;
+}
+
+.raw-html pre {
+  max-height: 300px;
+  overflow: auto;
+  background: #f5f5f7;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
