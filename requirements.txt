@@ -3,7 +3,6 @@ uvicorn[standard]
 python-multipart
 pydantic-settings
 google-genai
-google-cloud-vision
 pillow
 opencv-python
 jinja2

@@ -24,11 +24,13 @@ export async function extractColorStyle(file: File): Promise<ColorStyleResult> {
 
 export async function assembleHtml(
   layout: LayoutExtractionResult,
-  styles: ColorStyleResult
+  styles: ColorStyleResult,
+  assets?: Record<number, string>
 ): Promise<HtmlAssemblyResult> {
   const response = await client.post<HtmlAssemblyResult>("/api/html-assembly", {
     layout,
     styles,
+    assets: assets ?? null,
   });
   return response.data;
 }

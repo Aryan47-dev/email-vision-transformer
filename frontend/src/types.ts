@@ -27,7 +27,7 @@ export interface LayoutExtractionResult {
   model: string;
 }
 
-export type ColorStyleSource = "gemini" | "vision_fallback";
+export type ColorStyleSource = "gemini" | "local_fallback";
 
 export interface ColorStyleResult {
   bg_color: string;

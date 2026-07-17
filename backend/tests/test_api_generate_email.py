@@ -13,7 +13,6 @@ client = TestClient(app)
 def override_settings(**overrides) -> Settings:
     defaults = {
         "google_api_key": "gemini-key",
-        "google_cloud_vision_api_key": "vision-key",
         "max_upload_bytes": 1024,
     }
     defaults.update(overrides)

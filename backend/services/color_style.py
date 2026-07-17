@@ -1,7 +1,8 @@
+import io
+
 from google import genai
-from google.api_core.client_options import ClientOptions
-from google.cloud import vision
 from google.genai import types
+from PIL import Image
 from pydantic import TypeAdapter, ValidationError
 
 from backend.config import Settings
@@ -77,41 +78,24 @@ def _try_gemini(
     return None
 
 
-def _hex_from_rgb(color) -> str:
-    r, g, b = color.red, color.green, color.blue
-    # Cloud Vision's image_properties returns 0-255 in practice, despite the
-    # google.type.Color proto documenting a [0, 1] range - normalize defensively.
-    if max(r, g, b) <= 1.0:
-        r, g, b = r * 255, g * 255, b * 255
-
-    r = max(0, min(255, round(r)))
-    g = max(0, min(255, round(g)))
-    b = max(0, min(255, round(b)))
+def _hex_from_rgb(r: int, g: int, b: int) -> str:
     return f"#{r:02X}{g:02X}{b:02X}"
 
 
-def _vision_fallback(image_bytes: bytes, settings: Settings) -> ColorStyleResult:
-    if not settings.google_cloud_vision_api_key:
-        raise ColorStyleExtractionError("GOOGLE_CLOUD_VISION_API_KEY is not configured")
-
+def _local_color_fallback(image_bytes: bytes) -> ColorStyleResult:
     try:
-        client = vision.ImageAnnotatorClient(
-            client_options=ClientOptions(api_key=settings.google_cloud_vision_api_key)
-        )
-        response = client.image_properties(image=vision.Image(content=image_bytes))
+        with Image.open(io.BytesIO(image_bytes)) as img:
+            rgb_img = img.convert("RGB")
+            rgb_img.thumbnail((150, 150))
+            paletted = rgb_img.quantize(colors=8)
+            palette = paletted.getpalette()
+            color_counts = sorted(paletted.getcolors(), reverse=True)
     except Exception as exc:
-        raise ColorStyleExtractionError(f"Vision image_properties failed: {exc}") from exc
+        raise ColorStyleExtractionError(f"Failed to analyze image locally: {exc}") from exc
 
-    if response.error and response.error.message:
-        raise ColorStyleExtractionError(response.error.message)
-
-    colors = sorted(
-        response.image_properties_annotation.dominant_colors.colors,
-        key=lambda c: c.pixel_fraction,
-        reverse=True,
-    )
-
-    hex_colors = [_hex_from_rgb(c.color) for c in colors[:3]]
+    hex_colors = [
+        _hex_from_rgb(*palette[index * 3 : index * 3 + 3]) for _, index in color_counts[:3]
+    ]
     while len(hex_colors) < 3:
         hex_colors.append(_FALLBACK_BG_COLOR if not hex_colors else _FALLBACK_TEXT_COLOR)
 
@@ -125,7 +109,7 @@ def _vision_fallback(image_bytes: bytes, settings: Settings) -> ColorStyleResult
         body_font=_FALLBACK_BODY_FONT,
         body_font_size=_FALLBACK_BODY_FONT_SIZE,
         degraded=True,
-        source="vision_fallback",
+        source="local_fallback",
     )
 
 
@@ -136,4 +120,4 @@ def extract_color_style(
     if fields:
         return ColorStyleResult(**fields.model_dump(), degraded=False, source="gemini")
 
-    return _vision_fallback(image_bytes, settings)
+    return _local_color_fallback(image_bytes)

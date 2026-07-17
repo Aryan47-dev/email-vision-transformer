@@ -8,7 +8,6 @@ class Settings(BaseSettings):
 
     google_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
-    google_cloud_vision_api_key: str = ""
     max_upload_bytes: int = 10 * 1024 * 1024
 
 

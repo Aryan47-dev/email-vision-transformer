@@ -24,4 +24,4 @@ class ColorStyleFields(BaseModel):
 
 class ColorStyleResult(ColorStyleFields):
     degraded: bool = False
-    source: Literal["gemini", "vision_fallback"]
+    source: Literal["gemini", "local_fallback"]

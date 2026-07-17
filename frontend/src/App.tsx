@@ -30,6 +30,37 @@ function extractErrorMessage(error: unknown): string {
   return "Unknown error";
 }
 
+// Always re-encodes to image/png via canvas, regardless of the original
+// upload's format - matches the backend's own Pillow-based normalization,
+// and guarantees the result satisfies the data:image/(png|jpeg|webp|gif)
+// allow-list the backend validates asset URLs against.
+function fileToPngDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      URL.revokeObjectURL(objectUrl);
+
+      if (!ctx) {
+        reject(new Error("Canvas 2D context unavailable"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to load image for re-encoding"));
+    };
+    img.src = objectUrl;
+  });
+}
+
 function App() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<Status>("idle");
@@ -49,7 +80,13 @@ function App() {
       const styles = await extractColorStyle(selectedFile);
 
       setStatus("assembling");
-      const result = await assembleHtml(layout, styles);
+      // If layout-extraction couldn't segment the image, it falls back to a
+      // single image block covering the whole design. Show the user's real
+      // upload there instead of a generic placeholder.
+      const assets = layout.degraded
+        ? { 0: await fileToPngDataUrl(selectedFile) }
+        : undefined;
+      const result = await assembleHtml(layout, styles, assets);
 
       setHtml(result.html);
       setStatus("done");

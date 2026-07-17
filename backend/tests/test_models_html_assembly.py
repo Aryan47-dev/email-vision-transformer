@@ -61,3 +61,30 @@ def test_rejects_data_scheme():
             styles=make_styles(),
             assets={0: "data:text/html,<script>alert(1)</script>"},
         )
+
+
+def test_accepts_data_image_png_uri():
+    request = HtmlAssemblyRequest(
+        layout=make_layout(),
+        styles=make_styles(),
+        assets={0: "data:image/png;base64,aGVsbG8="},
+    )
+    assert request.assets[0].startswith("data:image/png;base64,")
+
+
+def test_accepts_data_image_jpeg_uri():
+    request = HtmlAssemblyRequest(
+        layout=make_layout(),
+        styles=make_styles(),
+        assets={0: "data:image/jpeg;base64,aGVsbG8="},
+    )
+    assert request.assets[0].startswith("data:image/jpeg;base64,")
+
+
+def test_rejects_data_image_svg_uri():
+    with pytest.raises(ValidationError):
+        HtmlAssemblyRequest(
+            layout=make_layout(),
+            styles=make_styles(),
+            assets={0: "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="},
+        )
